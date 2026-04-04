@@ -1,9 +1,8 @@
 import typer
 from typing import List
-from FileBinder import FileBinder
+from src.FileBinder import FileBinder
 
 app = typer.Typer(name="filebinder", help="Utility for merging files", add_completion=False)
-
 
 @app.command(name="list", help="Show list of files to be processed")
 def cmd_list(
@@ -44,7 +43,6 @@ def cmd_bind(
     typer.echo("Starting merge...")
     binder.bind()
     typer.echo(f"Done! Result saved to: {output}")
-
 
 if __name__ == "__main__":
     app()

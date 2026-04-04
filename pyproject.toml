@@ -1,0 +1,15 @@
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*"]
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "filebinder"
+version = "0.1.0"
+dependencies = ["typer==0.24.1"]
+
+[project.scripts]
+filebinder = "src.file_binder_cli:app"
