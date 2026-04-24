@@ -66,7 +66,7 @@ def info():
     typer.echo("-------------------------------")
     typer.echo("Version:   1.0.0")
     typer.echo("Author:    FeodorCore")
-    typer.echo("GitHub:    https://github.com/feodorcore")
+    typer.echo("GitHub:    https://github.com/FeodorCore/FileBinder")
     typer.echo("Description: A utility for efficiently bundling and indexing files")
     typer.echo("-------------------------------")
     typer.secho("Thank you for using FileBinder!", fg=typer.colors.RED)
