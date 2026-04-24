@@ -1,81 +1,84 @@
 # FileBinder
+[🇷🇺 Русский](README.ru.md) | [🇬🇧 English](README.md)
 
-A command-line utility and Python library for collecting, filtering, and bundling text files from a project directory into a single document. Ideal for feeding codebases to LLMs, archiving, or quick project analysis.
+Console utility for merging project files into one text file.
 
-## 🔹 Requirements
-- Python **3.10+** (uses modern type hints: `list[str]`, `Path | str`, `@dataclass(slots=True)`)
-- Dependencies: `typer==0.24.1`
+## Installation
 
-## 📦 Installation
 ```bash
-pip install -r requirements.txt
+pip install .
 ```
 
-## 🖥️ CLI Usage
-Run from the project root:
-```bash
-python src/file_binder_cli.py <command> [options]
+Requirements: Python 3.10+, `typer==0.24.1`.
+
+## Usage
+
+```
+filebinder [COMMAND] [OPTIONS]
 ```
 
-### Commands
-| Command | Description |
-|---------|-------------|
-| `list`  | Preview the list of files that will be processed |
-| `bind`  | Merge files into a single output document |
+## Commands
 
-### Options
-| Flag | Description | Default |
-|------|-------------|---------|
-| `-r, --root` | Project root directory | `.` |
-| `-o, --output` | Output file path (`bind` only) | `filebinder.txt` |
-| `--ef` | File names to exclude (repeatable) | `[]` |
-| `--ed` | Directory names to exclude (repeatable) | `[]` |
-| `-d, --dotfiles` | Include hidden files/folders (`.` prefix) | `False` |
-| `-e, --encoding` | Text encoding | `utf-8` |
+### `bind`
+Bundle files into one output file.
 
-### Examples
-```bash
-# Preview files, excluding Git and cache directories
-python src/file_binder_cli.py list --root . --ed .git --ed __pycache__ --ef .gitignore
-
-# Bundle the project into bundle.txt
-python src/file_binder_cli.py bind --root . --output bundle.txt --ed .git --ed .venv --ed __pycache__
+```
+filebinder bind [OPTIONS]
 ```
 
-## 💻 Programmatic Usage
-```python
-from src.FileBinder import FileBinder
+Options:
+- `--ignore` / `-i` – Bypass the ignore file (ignore rules are not applied).
+- `--hidden` / `-s` – Include hidden files and directories.
+- `--nignore` / `-ni` TEXT – Custom name for the ignore file (default: `filebinderignore.txt`).
+- `--nbinder` / `-nb` TEXT – Name of the output bundle file (default: `filebinder.txt`).
 
-binder = FileBinder(
-    root_dir="path/to/project",
-    target_file="output.txt",
-    exclude_dirs={".git", "__pycache__", ".venv"},
-    exclude_files={"README.md"},
-    dotfiles=False,
-    encoding="utf-8"
-)
+### `read`
+List files that will be included (dry-run, no file written).
 
-binder.bind()  # Execute the bundling process
+```
+filebinder read [OPTIONS]
 ```
 
-## 📄 Output Format
-Each file is wrapped with clear delimiters:
-```
----
-relative/path/to/file.py
----
-file contents...
----
-```
-The document ends with an auto-generated `STRUCTURE:` section containing a sorted Python list of all successfully included files.
+Options:
+- `--ignore` / `-i`
+- `--hidden` / `-s`
+- `--nignore` / `-ni` TEXT
 
-## 📁 Project Structure
+### `info`
+Show program version, author, and description.
+
+## Ignore file (`filebinderignore.txt`)
+A plain text file with one relative path or directory prefix per line. Directories must end with `/` or be used as a prefix. Lines can be trimmed; empty lines are ignored.
+
+Example:
 ```
-FileBinder/
-├── requirements.txt
-└── src/
-    ├── FileBinder.py          # Core logic: config, collection, filtering, I/O
-    └── file_binder_cli.py     # CLI interface powered by typer
+.git/
+node_modules/
+temp.txt
+dist/main.js
 ```
 
-> 💡 **Note:** Only text files are processed. Binary files, unreadable files, or files that fail decoding are safely skipped with a warning logged to the console. Custom formatters can be passed via the `formatter` parameter in the Python API.
+- Trailing slashes are stripped automatically.
+- Matching logic: exact relative path match **or** file path starts with a listed directory prefix.
+
+## Output format
+The bundle file (`filebinder.txt` by default) contains:
+
+```
+-----relative/path/to/file.ext-----
+
+<file content>
+
+-----another/file.ext-----
+
+<file content>
+```
+
+A status report is printed to the terminal:
+- ✓ file recorded / read successfully
+- ✗ file not found / permission error / unicode decode error
+
+## Notes
+- Always runs in the current working directory.
+- The output file and the ignore file themselves are never included.
+- Unicode decode errors are skipped and reported.

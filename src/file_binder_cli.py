@@ -1,48 +1,85 @@
+from pathlib import Path
 import typer
-from typing import List
 from src.FileBinder import FileBinder
 
-app = typer.Typer(name="filebinder", help="Utility for merging files", add_completion=False)
+app = typer.Typer(
+    name="filebinder",
+    help="A CLI utility for bundling project files",
+    add_completion=False,
+)
 
-@app.command(name="list", help="Show list of files to be processed")
-def cmd_list(
-        root: str = typer.Option(".", "--root", "-r", help="Project root directory"),
-        exclude_file: List[str] = typer.Option([], "--ef", help="Exclude files (can be specified multiple times)"),
-        exclude_dir: List[str] = typer.Option([], "--ed", help="Exclude directories (can be specified multiple times)"),
-        dotfiles: bool = typer.Option(False, "--dotfiles", "-d", help="Include hidden files (starting with a dot)"),
+@app.command(help="Bundle files into a single output file")
+def bind(
+        ignore_file: bool = typer.Option(
+            False, "--ignore", "-i", help="Bypass the ignore file"
+        ),
+        hidden_files: bool = typer.Option(
+            False, "--hidden", "-s", help="Include hidden files and directories"
+        ),
+        name_file_ignore: str = typer.Option(
+            "filebinderignore.txt",
+            "--nignore",
+            "-ni",
+            help="Custom name for the ignore file",
+        ),
+        name_file_binder: str = typer.Option(
+            "filebinder.txt", "--nbinder", "-nb", help="Name of the output bundle file"
+        ),
 ):
-    binder = FileBinder(
-        root_dir=root,
-        exclude_files=set(exclude_file),
-        exclude_dirs=set(exclude_dir),
-        dotfiles=dotfiles
+    filebinder = FileBinder(
+        ignore_file=ignore_file,
+        hidden_files=hidden_files,
+        name_file_ignore=name_file_ignore,
+        name_file_binder=name_file_binder,
     )
-    files = binder.collect_files()
-    typer.echo(f"Found {len(files)} files:")
-    for f in files:
-        typer.echo(f"  - {f}")
+    show_bind = filebinder.bind()
+    typer.secho(f"Files are written to: {name_file_binder}")
+    show_files(show_bind, "recorded")
 
 
-@app.command(name="bind", help="Merge files into a single output file")
-def cmd_bind(
-        root: str = typer.Option(".", "--root", "-r", help="Project root directory"),
-        output: str = typer.Option("filebinder.txt", "--output", "-o", help="Output file name"),
-        exclude_file: List[str] = typer.Option([], "--ef", help="Exclude files"),
-        exclude_dir: List[str] = typer.Option([], "--ed", help="Exclude directories"),
-        dotfiles: bool = typer.Option(False, "--dotfiles", "-d", help="Include hidden files"),
-        encoding: str = typer.Option("utf-8", "--encoding", "-e", help="File encoding"),
+@app.command(help="List files that will be included")
+def read(
+        ignore_file: bool = typer.Option(
+            False, "--ignore", "-i", help="Bypass the ignore file"
+        ),
+        hidden_files: bool = typer.Option(
+            False, "--hidden", "-s", help="Include hidden files and directories"
+        ),
+        name_file_ignore: str = typer.Option(
+            "filebinderignore.txt",
+            "--nignore", "-ni",
+            help="Custom name for the ignore file",
+        ),
 ):
-    binder = FileBinder(
-        root_dir=root,
-        target_file=output,
-        exclude_files=set(exclude_file),
-        exclude_dirs=set(exclude_dir),
-        dotfiles=dotfiles,
-        encoding=encoding
+    filebinder = FileBinder(
+        ignore_file=ignore_file,
+        hidden_files=hidden_files,
+        name_file_ignore=name_file_ignore,
     )
-    typer.echo("Starting merge...")
-    binder.bind()
-    typer.echo(f"Done! Result saved to: {output}")
+    show_read = filebinder.read()
+    show_files(show_read, "read")
+
+
+@app.command(help="Show program information")
+def info():
+    typer.secho("FileBinder", bold=True)
+    typer.echo("-------------------------------")
+    typer.echo("Version:   1.0.0")
+    typer.echo("Author:    FeodorCore")
+    typer.echo("GitHub:    https://github.com/feodorcore")
+    typer.echo("Description: A utility for efficiently bundling and indexing files")
+    typer.echo("-------------------------------")
+    typer.secho("Thank you for using FileBinder!", fg=typer.colors.RED)
+
+
+def show_files(files: dict[Path, str], successful_status: str):
+    typer.secho("Files status:")
+    for path, status in files.items():
+        if status == successful_status:
+            typer.secho(f" ✓ {str(path):<50}{status}")
+        else:
+            typer.secho(f" ✗ {str(path):<50}{status}", fg=typer.colors.RED)
+
 
 if __name__ == "__main__":
     app()
