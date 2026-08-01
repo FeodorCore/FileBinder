@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Annotated
 import typer
 from src.FileBinder import FileBinder
 
@@ -8,23 +9,22 @@ app = typer.Typer(
     add_completion=False,
 )
 
+
 @app.command(help="Bundle files into a single output file")
 def bind(
-        ignore_file: bool = typer.Option(
-            False, "--ignore", "-i", help="Bypass the ignore file"
-        ),
-        hidden_files: bool = typer.Option(
-            False, "--hidden", "-s", help="Include hidden files and directories"
-        ),
-        name_file_ignore: str = typer.Option(
-            "filebinderignore.txt",
-            "--nignore",
-            "-ni",
-            help="Custom name for the ignore file",
-        ),
-        name_file_binder: str = typer.Option(
-            "filebinder.txt", "--nbinder", "-nb", help="Name of the output bundle file"
-        ),
+    ignore_file: Annotated[
+        bool, typer.Option("--ignore", "-i", help="Bypass the ignore file")
+    ] = False,
+    hidden_files: Annotated[
+        bool,
+        typer.Option("--hidden", "-s", help="Include hidden files and directories"),
+    ] = False,
+    name_file_ignore: Annotated[
+        str, typer.Option("--nignore", "-ni", help="Custom name for the ignore file")
+    ] = "filebinderignore.txt",
+    name_file_binder: Annotated[
+        str, typer.Option("--nbinder", "-nb", help="Name of the output bundle file")
+    ] = "filebinder.txt",
 ):
     filebinder = FileBinder(
         ignore_file=ignore_file,
@@ -39,17 +39,21 @@ def bind(
 
 @app.command(help="List files that will be included")
 def read(
-        ignore_file: bool = typer.Option(
-            False, "--ignore", "-i", help="Bypass the ignore file"
-        ),
-        hidden_files: bool = typer.Option(
-            False, "--hidden", "-s", help="Include hidden files and directories"
-        ),
-        name_file_ignore: str = typer.Option(
-            "filebinderignore.txt",
-            "--nignore", "-ni",
+    ignore_file: Annotated[
+        bool, typer.Option("--ignore", "-i", help="Bypass the ignore file")
+    ] = False,
+    hidden_files: Annotated[
+        bool,
+        typer.Option("--hidden", "-s", help="Include hidden files and directories"),
+    ] = False,
+    name_file_ignore: Annotated[
+        str,
+        typer.Option(
+            "--nignore",
+            "-ni",
             help="Custom name for the ignore file",
         ),
+    ] = "filebinderignore.txt",
 ):
     filebinder = FileBinder(
         ignore_file=ignore_file,
@@ -64,7 +68,7 @@ def read(
 def info():
     typer.secho("FileBinder", bold=True)
     typer.echo("-------------------------------")
-    typer.echo("Version:   1.0.0")
+    typer.echo("Version:   1.0.1")
     typer.echo("Author:    FeodorCore")
     typer.echo("GitHub:    https://github.com/FeodorCore/FileBinder")
     typer.echo("Description: A utility for efficiently bundling and indexing files")
