@@ -8,7 +8,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "filebinder"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = ["typer==0.24.1"]
 
 [project.scripts]
