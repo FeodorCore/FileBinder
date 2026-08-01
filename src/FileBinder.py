@@ -1,5 +1,6 @@
 from pathlib import Path
 
+
 class FileBinder:
     def __init__(
         self,
@@ -8,14 +9,17 @@ class FileBinder:
         name_file_ignore: str = "filebinderignore.txt",
         name_file_binder: str = "filebinder.txt",
     ) -> None:
-        self.ignore_file = ignore_file
-        self.hidden_files = hidden_files
-        self.name_file_ignore = name_file_ignore
-        self.name_file_binder = name_file_binder
+        self.ignore_file: bool = ignore_file
+        self.hidden_files: bool = hidden_files
+        self.name_file_ignore: str = name_file_ignore
+        self.name_file_binder: str = name_file_binder
 
     def bind(self) -> dict[Path, str]:
         filebinder = FileBinderFilter(
-            self.ignore_file, self.hidden_files, self.name_file_ignore, self.name_file_binder
+            self.ignore_file,
+            self.hidden_files,
+            self.name_file_ignore,
+            self.name_file_binder,
         )
         filter = filebinder.filters()
         return FileBinderOperationIO.write(filter, self.name_file_binder)
@@ -35,13 +39,13 @@ class FileBinderOperationIO:
     @staticmethod
     def write(filter_list: list[Path], name_file_binder: str) -> dict[Path, str]:
         with open(name_file_binder, "w", encoding="utf-8") as w_file:
-            report_dict = dict()
+            report_dict: dict[Path, str] = dict()
             for i in filter_list:
                 try:
                     with open(i, "r", encoding="utf-8") as r_file:
                         read_file = r_file.read()
-                        w_file.write(f"\n\n-----{i}-----\n\n")
-                        w_file.write(read_file)
+                        _ = w_file.write(f"\n\n-----{i}-----\n\n")
+                        _ = w_file.write(read_file)
                     report_dict[i] = "recorded"
                 except FileNotFoundError:
                     report_dict[i] = "not found"
@@ -53,11 +57,11 @@ class FileBinderOperationIO:
 
     @staticmethod
     def read(filter_list: list[Path]) -> dict[Path, str]:
-        report_dict = dict()
+        report_dict: dict[Path, str] = dict()
         for i in filter_list:
             try:
                 with open(i, "r", encoding="utf-8") as file:
-                    file.read(1)
+                    _ = file.read(1)
                     report_dict[i] = "read"
             except FileNotFoundError:
                 report_dict[i] = "not found"
@@ -76,13 +80,13 @@ class FileBinderFilter:
         name_file_ignore: str,
         name_file_binder: str,
     ):
-        self.ignore_file = ignore_file
-        self.hidden_files = hidden_files
-        self.name_file_ignore = name_file_ignore
-        self.name_file_binder = name_file_binder
+        self.ignore_file: bool = ignore_file
+        self.hidden_files: bool = hidden_files
+        self.name_file_ignore: str = name_file_ignore
+        self.name_file_binder: str = name_file_binder
         self.ignore_patterns = None
-        self.list_return_files = list()
-        self.current_dir = Path.cwd()
+        self.list_return_files: list[Path] = list()
+        self.current_dir: Path = Path.cwd()
 
     def filters(self) -> list[Path]:
         if not self.ignore_file:
@@ -122,4 +126,3 @@ class FileBinderFilter:
             return None
         except UnicodeDecodeError:
             return None
-
